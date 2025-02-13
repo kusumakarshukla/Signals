@@ -18,17 +18,21 @@ def get_stock_data(symbol, interval="1d", period="30d"):
 
 # Function to calculate technical indicators
 def add_indicators(df):
-    df["SMA_50"] = ta.sma(df["Close"], length=50)
-    df["SMA_200"] = ta.sma(df["Close"], length=200)
-    df["RSI"] = ta.rsi(df["Close"], length=14)
+    df["SMA_50"] = ta.sma(df["Close"], length=50).fillna(0)
+    df["SMA_200"] = ta.sma(df["Close"], length=200).fillna(0)
+    df["RSI"] = ta.rsi(df["Close"], length=14).fillna(50)
+    
     bbands = ta.bbands(df["Close"], length=20)
-    df["BB_Upper"] = bbands["BBU_20_2.0"]
-    df["BB_Lower"] = bbands["BBL_20_2.0"]
+    df["BB_Upper"] = bbands["BBU_20_2.0"].fillna(df["Close"])
+    df["BB_Lower"] = bbands["BBL_20_2.0"].fillna(df["Close"])
+    
     macd = ta.macd(df["Close"], fast=12, slow=26, signal=9)
-    df["MACD"] = macd["MACD_12_26_9"]
-    df["MACD_Signal"] = macd["MACDs_12_26_9"]
-    df["SMA_Percent"] = ((df["SMA_50"] - df["SMA_200"]) / df["SMA_200"]) * 100
+    df["MACD"] = macd["MACD_12_26_9"].fillna(0)
+    df["MACD_Signal"] = macd["MACDs_12_26_9"].fillna(0)
+    
+    df["SMA_Percent"] = ((df["SMA_50"] - df["SMA_200"]) / df["SMA_200"]).fillna(0) * 100
     return df
+
 
 # Function to generate buy/sell signals
 def generate_signals(df):
